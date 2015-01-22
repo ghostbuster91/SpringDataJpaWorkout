@@ -1,10 +1,9 @@
 package ghostbuster.tests.impl;
 
 import ghostbuster.dao.ApplicationConfiguration;
-import ghostbuster.dao.model.UserAccount;
 import ghostbuster.dao.impl.UserAccountRepository;
+import ghostbuster.dao.model.UserAccount;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +12,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
