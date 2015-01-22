@@ -99,7 +99,7 @@ public class UserAccountTestExecutor {
         //then
         Cache cache = cacheManager.getCache("byUsername");
         Cache.ValueWrapper wrapper = cache.get("Janek");
-        assertThat(wrapper.get()).isEqualTo(ua);
+        assertThat(wrapper.get()).isEqualTo(ua).isEqualTo(result);
 
     }
 
