@@ -32,7 +32,7 @@ public class UserAccountTestExecutor {
 
     @After
     public void clearCache(){
-        Optional.ofNullable(cacheManager.getCache("byUsername")).ifPresent(cache -> cache.clear());
+        cacheManager.getCache("byUsername").clear();
     }
 
     @Test
@@ -54,9 +54,18 @@ public class UserAccountTestExecutor {
     }
 
     @Test
-    public void test_get_entity() {
+    public void test_should_not_find_any_entity() {
         UserAccount user = userRepository.findOne((long) 124123);
         assertThat(user).isNull();
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    public void test_should_find_added_entity() throws Exception {
+        UserAccount saved = userRepository.save(new UserAccount("Janek", "Asd"));
+        UserAccount result = userRepository.findByName("Janek");
+
+        assertThat(result).isEqualTo(saved);
     }
 
     @Test
@@ -79,16 +88,6 @@ public class UserAccountTestExecutor {
 
     @Test
     @Transactional(readOnly = false)
-    public void test_should_find_added_entity() throws Exception {
-        UserAccount saved = userRepository.save(new UserAccount("Janek", "Asd"));
-        UserAccount result = userRepository.findByName("Janek");
-
-        assertThat(result).isEqualTo(saved);
-    }
-
-
-    @Test
-    @Transactional(readOnly = false)
     public void test_should_entity_be_cached() throws Exception {
         //given
         UserAccount ua = new UserAccount("Janek", "Asd");
@@ -103,25 +102,6 @@ public class UserAccountTestExecutor {
         assertThat(wrapper.get()).isEqualTo(ua);
 
     }
-    @Ignore
-    @Test
-    @Transactional(readOnly = false)
-    public void test_should_cached_entity_be_evicted() throws Exception {
 
-        UserAccount ua = new UserAccount("Franek", "Asd");
-        ua = userRepository.save(ua);
-        UserAccount result = userRepository.findByName("Ja2nek");
-//        assertThat(result).isEqualTo(ua);
-//
-//
-//        ua.setName("Kuba");
-//        userRepository.save(ua);
-//
-//        // Verify entity cached
-//        Cache cache = cacheManager.getCache("byUsername");
-//        Cache.ValueWrapper wrapper = cache.get("Janek");
-//        assertThat(wrapper.get()).isEqualTo(ua);
-
-    }
 
 }
