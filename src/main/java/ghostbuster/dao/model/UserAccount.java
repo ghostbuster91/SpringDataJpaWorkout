@@ -69,4 +69,14 @@ public class UserAccount extends AbstractEntityWithAutoId{
     public int hashCode() {
         return id.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "UserAccount{" +
+                "id=" + id +
+                "name='" + name + '\'' +
+                ", password='" + password + '\'' +
+                ", details=" + details +
+                '}';
+    }
 }

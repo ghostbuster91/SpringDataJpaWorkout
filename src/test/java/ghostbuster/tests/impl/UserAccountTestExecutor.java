@@ -3,6 +3,8 @@ package ghostbuster.tests.impl;
 import ghostbuster.dao.ApplicationConfiguration;
 import ghostbuster.dao.model.UserAccount;
 import ghostbuster.dao.impl.UserAccountRepository;
+import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +14,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@Transactional
+@Transactional(readOnly = true)
 @ContextConfiguration(classes = ApplicationConfiguration.class)
 public class UserAccountTestExecutor {
 
@@ -26,12 +30,23 @@ public class UserAccountTestExecutor {
     @Autowired
     private CacheManager cacheManager;
 
+    @After
+    public void clearCache(){
+        Optional.ofNullable(cacheManager.getCache("byUsername")).ifPresent(cache -> cache.clear());
+    }
+
     @Test
     public void repository_is_not_null() {
         assertThat(userRepository).isNotNull();
     }
 
     @Test
+    public void test_should_findAll_return_empty_list(){
+        assertThat(userRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    @Transactional(readOnly = false)
     public void test_can_add_entity_to_dataBase() throws Exception {
         userRepository.save(new UserAccount("Jan", "qweASD"));
 
@@ -45,11 +60,12 @@ public class UserAccountTestExecutor {
     }
 
     @Test
+    @Transactional(readOnly = false)
     public void test_update_entity() {
         //given:
         UserAccount saved = userRepository.save(new UserAccount("Jan", "asdasd"));
         assertThat(userRepository.findAll()).hasSize(1);
-        Long savedId = saved.getId();
+        final Long savedId = saved.getId();
 
         //when:
         saved.setName("Janusz");
@@ -61,28 +77,40 @@ public class UserAccountTestExecutor {
         assertThat(userRepository.findByName("Janusz").getId()).isEqualTo(savedId);
     }
 
+    @Test
+    @Transactional(readOnly = false)
+    public void test_should_find_added_entity() throws Exception {
+        UserAccount saved = userRepository.save(new UserAccount("Janek", "Asd"));
+        UserAccount result = userRepository.findByName("Janek");
+
+        assertThat(result).isEqualTo(saved);
+    }
+
 
     @Test
+    @Transactional(readOnly = false)
     public void test_should_entity_be_cached() throws Exception {
-
+        //given
         UserAccount ua = new UserAccount("Janek", "Asd");
         ua = userRepository.save(ua);
-        UserAccount result = userRepository.findByName("Janek");
-        assertThat(result).isEqualTo(ua);
 
-        // Verify entity cached
+        //when
+        UserAccount result = userRepository.findByName("Janek");
+
+        //then
         Cache cache = cacheManager.getCache("byUsername");
         Cache.ValueWrapper wrapper = cache.get("Janek");
         assertThat(wrapper.get()).isEqualTo(ua);
 
     }
+    @Ignore
+    @Test
+    @Transactional(readOnly = false)
+    public void test_should_cached_entity_be_evicted() throws Exception {
 
-//    @Test
-//    public void test_should_cached_entity_be_evicted() throws Exception {
-//
-//        UserAccount ua = new UserAccount("Janek", "Asd");
-//        ua = userRepository.save(ua);
-//        UserAccount result = userRepository.findByName("Janek");
+        UserAccount ua = new UserAccount("Franek", "Asd");
+        ua = userRepository.save(ua);
+        UserAccount result = userRepository.findByName("Ja2nek");
 //        assertThat(result).isEqualTo(ua);
 //
 //
@@ -93,7 +121,7 @@ public class UserAccountTestExecutor {
 //        Cache cache = cacheManager.getCache("byUsername");
 //        Cache.ValueWrapper wrapper = cache.get("Janek");
 //        assertThat(wrapper.get()).isEqualTo(ua);
-//
-//    }
+
+    }
 
 }
