@@ -39,6 +39,30 @@ public class UserAccountTestExecutor {
     }
 
     @Test
+    public void test_get_entity() {
+        UserAccount user = userRepository.findOne((long) 124123);
+        assertThat(user).isNull();
+    }
+
+    @Test
+    public void test_update_entity() {
+        //given:
+        UserAccount saved = userRepository.save(new UserAccount("Jan", "asdasd"));
+        assertThat(userRepository.findAll()).hasSize(1);
+        Long savedId = saved.getId();
+
+        //when:
+        saved.setName("Janusz");
+        userRepository.save(saved);
+
+        //then:
+        assertThat(userRepository.findByName("Janusz")).isNotNull();
+        assertThat(userRepository.findAll()).hasSize(1);
+        assertThat(userRepository.findByName("Janusz").getId()).isEqualTo(savedId);
+    }
+
+
+    @Test
     public void test_should_entity_be_cached() throws Exception {
 
         UserAccount ua = new UserAccount("Janek", "Asd");
@@ -53,16 +77,23 @@ public class UserAccountTestExecutor {
 
     }
 
-    @Test
-    public void testB_Get() {
-        UserAccount user = userRepository.findOne((long) 124123);
-        assertThat(user).isNull();
-    }
-
-    @Test
-    public void testF_UpdateRollbacked() {
-//        userRepository.update(1, "kazik");
-        userRepository.save(new UserAccount("Jan","asdasd"));
-    }
+//    @Test
+//    public void test_should_cached_entity_be_evicted() throws Exception {
+//
+//        UserAccount ua = new UserAccount("Janek", "Asd");
+//        ua = userRepository.save(ua);
+//        UserAccount result = userRepository.findByName("Janek");
+//        assertThat(result).isEqualTo(ua);
+//
+//
+//        ua.setName("Kuba");
+//        userRepository.save(ua);
+//
+//        // Verify entity cached
+//        Cache cache = cacheManager.getCache("byUsername");
+//        Cache.ValueWrapper wrapper = cache.get("Janek");
+//        assertThat(wrapper.get()).isEqualTo(ua);
+//
+//    }
 
 }

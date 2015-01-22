@@ -4,10 +4,15 @@
  */
 package ghostbuster.dao.model;
 
-public class AccountDetails {
-    
-    private Integer id;
+import javax.persistence.*;
+
+@Entity
+public class AccountDetails extends AbstractEntityWithAutoId{
+
+    @OneToOne(fetch= FetchType.LAZY)
+    @PrimaryKeyJoinColumn
     private UserAccount userAccount;
+
     private String fullName;
 
 

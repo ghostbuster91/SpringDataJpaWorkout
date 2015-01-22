@@ -1,15 +1,9 @@
 package ghostbuster.dao.model;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
-public class UserAccount {
-
-    @Id
-    @GeneratedValue
-    private Long id;
+public class UserAccount extends AbstractEntityWithAutoId{
 
     @Column(nullable=false, unique=true, name="NAME")
     private String name;
@@ -17,9 +11,18 @@ public class UserAccount {
     @Column(nullable=false, name="PASSWORD")
     private String password;
 
-//    @OneToOne(cascade= CascadeType.ALL)
-//    private AccountDetails details;
+    @OneToOne(cascade= CascadeType.ALL)
+    private AccountDetails details;
 //
+
+    public AccountDetails getDetails() {
+        return details;
+    }
+
+    public void setDetails(AccountDetails details) {
+        this.details = details;
+    }
+
 //    @OneToMany(fetch = FetchType.LAZY)
 //    private Set<Role> roles = new HashSet<Role>();
 //
@@ -33,14 +36,6 @@ public class UserAccount {
     public UserAccount(String name, String password) {
         this.name = name;
         this.password = password;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getName() {
