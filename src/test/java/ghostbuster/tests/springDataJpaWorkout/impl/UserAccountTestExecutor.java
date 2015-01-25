@@ -21,6 +21,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -266,7 +267,10 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Rollback(false)
     public void testMB_delete_entity_from_collection() throws Exception {
         UserAccount ua = userRepository.findByName("albercik");
-        ua.getPermissions().remove(0);
+
+        //we have to remove the connections from both entities
+        ua.getPermissions().stream().forEach(p -> p.setAccount(null));
+        ua.getPermissions().removeAll(ua.getPermissions());
         ua = userRepository.save(ua);
     }
 
@@ -275,8 +279,8 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Rollback(false)
     public void testMC_delete_entity_from_collection(){
         //then
+        assertThat(userRepository.findByName("albercik").getPermissions()).isEmpty();
         assertThat(permissionRepository.findAll()).isNotEmpty(); // The related child entity is still in repository!
-
         //clean
         userRepository.delete(userRepository.findAll());
         permissionRepository.delete(permissionRepository.findAll());
@@ -322,7 +326,6 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     public void testOB_delete_entity_from_collection_using_orphanRemoval() throws Exception {
         UserAccount ua = userRepository.findByName("albercik");
         ua.getTransactions().remove(0);
-        ua = userRepository.save(ua);
     }
 
     @Test
@@ -336,5 +339,43 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
         userRepository.delete(userRepository.findAll());
     }
 
+    @Test
+    @Transactional(readOnly = false)
+    public void testP_prePersist_annotation() throws Exception {
+        Transaction transaction = new Transaction();
 
+        transaction = transactionRepository.save(transaction);
+        assertThat(transaction.getCreatedDateTime()).isNotNull();
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    @Rollback(false)
+    public void testRA_preUpdate_annotation() throws Exception {
+        //given
+        Transaction transaction = new Transaction();
+        transaction.setAmount(new BigDecimal(11));
+        transaction = transactionRepository.save(transaction);
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    @Rollback(false)
+    public void testRB_preUpdate_annotation() throws Exception {
+        //when
+        Transaction transaction = transactionRepository.findAll().get(0);
+        transaction.setAmount(new BigDecimal(112));
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    @Rollback(false)
+    public void testRC_preUpdate_annotation() throws Exception {
+        //than
+        Transaction transaction = transactionRepository.findAll().get(0);
+        assertThat(transaction.getLastModifiedDateTime()).isNotNull();
+
+        //clean
+        transactionRepository.delete(transactionRepository.findAll());
+    }
 }
