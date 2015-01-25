@@ -238,6 +238,11 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Transactional(readOnly = false)
     public void testM_transactional_property_can_be_injected_from_outside() {
         //TODO: configure aspectJ or Hibernate event listener
+        UserAccount ua = new UserAccount("kasper", "qwe");
+        ua = userRepository.save(ua);
+
+        ua = userRepository.findByName("kasper");
+        assertThat(ua.getInjectableProperty()).isNotNull();
     }
 
     @Test
