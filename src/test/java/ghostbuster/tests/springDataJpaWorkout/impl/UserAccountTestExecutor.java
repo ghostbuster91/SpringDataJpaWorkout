@@ -123,7 +123,7 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Rollback(false)
     @Transactional(readOnly = false)
-    public void testG_A_prepare() {
+    public void testGA_entity_should_be_removed_from_cache() {
         //given
         UserAccount ua = new UserAccount("Janek", "StareHaslo");
         ua = userRepository.save(ua);
@@ -137,7 +137,7 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Rollback(false)
     @Transactional(readOnly = false)
-    public void testG_B_entity_should_be_removed_from_cache() throws Exception {
+    public void testGB_entity_should_be_removed_from_cache() throws Exception {
         //then
         Cache cache = cacheManager.getCache("byUsername");
         assertThat(cache.get("Janek")).isNull();
