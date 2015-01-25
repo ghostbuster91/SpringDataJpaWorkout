@@ -1,6 +1,10 @@
 package ghostbuster.dao.model;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 public class UserAccount extends AbstractEntityWithAutoId{
@@ -23,11 +27,11 @@ public class UserAccount extends AbstractEntityWithAutoId{
         this.details = details;
     }
 
-//    @OneToMany(fetch = FetchType.LAZY)
-//    private Set<Role> roles = new HashSet<Role>();
-//
-//    @OneToMany(fetch = FetchType.EAGER, cascade= CascadeType.ALL, mappedBy="account")
-//    private Set<Permission> permissions = new HashSet<Permission>();
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Role> roles = new ArrayList<Role>();
+
+    @OneToMany(fetch = FetchType.EAGER, cascade= CascadeType.ALL, mappedBy="account")
+    private Set<Permission> permissions = new HashSet<Permission>();
 
     public UserAccount() {
     }
@@ -54,23 +58,6 @@ public class UserAccount extends AbstractEntityWithAutoId{
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        UserAccount that = (UserAccount) o;
-
-        if (!id.equals(that.id)) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return id.hashCode();
-    }
-
-    @Override
     public String toString() {
         return "UserAccount{" +
                 "id=" + id +
@@ -78,5 +65,21 @@ public class UserAccount extends AbstractEntityWithAutoId{
                 ", password='" + password + '\'' +
                 ", details=" + details +
                 '}';
+    }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
+    public Set<Permission> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Set<Permission> permissions) {
+        this.permissions = permissions;
     }
 }

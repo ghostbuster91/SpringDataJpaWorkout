@@ -16,7 +16,6 @@ import java.util.Arrays;
 @EnableAutoConfiguration
 public class ApplicationConfiguration {
 
-
     @Bean
     public CacheManager cacheManager() {
         Cache cache = new ConcurrentMapCache("byUsername");

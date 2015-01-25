@@ -15,5 +15,19 @@ public class AccountDetails extends AbstractEntityWithAutoId{
 
     private String fullName;
 
+    public UserAccount getUserAccount() {
+        return userAccount;
+    }
 
+    public void setUserAccount(UserAccount userAccount) {
+        this.userAccount = userAccount;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
 }
