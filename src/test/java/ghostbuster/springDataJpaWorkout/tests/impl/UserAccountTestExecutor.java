@@ -1,12 +1,12 @@
-package ghostbuster.tests.springDataJpaWorkout.impl;
+package ghostbuster.springDataJpaWorkout.tests.impl;
 
+import ghostbuster.springDataJpaWorkout.tests.AbstractTestExecutor;
 import ghostbuster.springDataJpaWorkout.ApplicationConfiguration;
 import ghostbuster.springDataJpaWorkout.dao.PermissionRepository;
 import ghostbuster.springDataJpaWorkout.dao.TransactionRepository;
 import ghostbuster.springDataJpaWorkout.dao.UserAccountRepository;
 import ghostbuster.springDataJpaWorkout.model.*;
 import ghostbuster.springDataJpaWorkout.utils.NonPersistClass;
-import ghostbuster.tests.springDataJpaWorkout.AbstractTestExecutor;
 import org.junit.After;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;

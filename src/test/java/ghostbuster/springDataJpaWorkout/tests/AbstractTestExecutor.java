@@ -1,4 +1,4 @@
-package ghostbuster.tests.springDataJpaWorkout;
+package ghostbuster.springDataJpaWorkout.tests;
 
 
 import org.apache.log4j.Logger;
