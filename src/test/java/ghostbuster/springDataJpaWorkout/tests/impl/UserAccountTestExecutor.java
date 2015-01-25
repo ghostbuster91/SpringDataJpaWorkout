@@ -64,7 +64,7 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
 
     @Test
     @Transactional(readOnly = false)
-    public void testB_can_add_entity_to_dataBase() throws Exception {
+    public void testB_can_add_entity_to_dataBase(){
         userRepository.save(new UserAccount("Jan", "qweASD"));
 
         assertThat(userRepository.findAll()).hasSize(1);
@@ -79,7 +79,7 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
 
     @Test
     @Transactional(readOnly = false)
-    public void testD_should_find_added_entity() throws Exception {
+    public void testD_should_find_added_entity(){
         UserAccount saved = userRepository.save(new UserAccount("Janek", "Asd"));
         UserAccount result = userRepository.findByName("Janek");
 
@@ -88,7 +88,8 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
 
     @Test
     @Transactional(readOnly = false)
-    public void testE_update_entity() {
+    @Rollback(false)
+    public void testEA_update_entity() {
         //given:
         UserAccount saved = userRepository.save(new UserAccount("Jan", "asdasd"));
         assertThat(userRepository.findAll()).hasSize(1);
@@ -96,17 +97,24 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
 
         //when:
         saved.setName("Janusz");
-        userRepository.save(saved);
-
-        //then:
-        assertThat(userRepository.findByName("Janusz")).isNotNull();
-        assertThat(userRepository.findAll()).hasSize(1);
-        assertThat(userRepository.findByName("Janusz").getId()).isEqualTo(savedId);
+        //we don't need to call explicitly repository.save, changes will be persisted after transaction committed
     }
 
     @Test
     @Transactional(readOnly = false)
-    public void testF_should_entity_be_cached() {
+    @Rollback(false)
+    public void testEB_update_entity() {
+        //then:
+        assertThat(userRepository.findAll()).hasSize(1);
+        assertThat(userRepository.findByName("Janusz")).isNotNull();
+
+        //clean
+        cleanAllRepositories();
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    public void testF_should_entity_be_cached(){
         //given
         UserAccount ua = new UserAccount("Janek", "Asd");
         ua = userRepository.save(ua);
@@ -124,7 +132,7 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Rollback(false)
     @Transactional(readOnly = false)
-    public void testGA_entity_should_be_removed_from_cache() {
+    public void testGA_entity_should_be_removed_from_cache(){
         //given
         UserAccount ua = new UserAccount("Janek", "StareHaslo");
         ua = userRepository.save(ua);
@@ -138,13 +146,13 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Rollback(false)
     @Transactional(readOnly = false)
-    public void testGB_entity_should_be_removed_from_cache() throws Exception {
+    public void testGB_entity_should_be_removed_from_cache(){
         //then
         Cache cache = cacheManager.getCache("byUsername");
         assertThat(cache.get("Janek")).isNull();
 
         //clean
-        userRepository.delete(userRepository.findByName("Janek"));
+        cleanAllRepositories();
     }
 
     @Test
@@ -213,7 +221,7 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Transactional(readOnly = false)
     @Rollback(false)
-    public void testLA_transactional_property_should_not_be_persist() throws Exception {
+    public void testLA_transactional_property_should_not_be_persist() {
         //given
         UserAccount ua = new UserAccount("albercik", "katakumba");
 
@@ -231,7 +239,7 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
         assertThat(ua.getNonPersistProperty()).isNull();
 
         //clean
-        userRepository.delete(userRepository.findAll());
+        cleanAllRepositories();
     }
 
     @Ignore
@@ -249,7 +257,7 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Transactional(readOnly = false)
     @Rollback(false)
-    public void testMA_delete_entity_from_collection(){
+    public void testMA_delete_entity_from_collection() {
         UserAccount ua = new UserAccount("albercik", "katakumba");
         Permission perm = new Permission(PermissionType.CREATION);
 
@@ -265,7 +273,7 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Transactional(readOnly = false)
     @Rollback(false)
-    public void testMB_delete_entity_from_collection() throws Exception {
+    public void testMB_delete_entity_from_collection(){
         UserAccount ua = userRepository.findByName("albercik");
 
         //we have to remove the connections from both entities
@@ -277,19 +285,19 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Transactional(readOnly = false)
     @Rollback(false)
-    public void testMC_delete_entity_from_collection(){
+    public void testMC_delete_entity_from_collection() {
         //then
         assertThat(userRepository.findByName("albercik").getPermissions()).isEmpty();
         assertThat(permissionRepository.findAll()).isNotEmpty(); // The related child entity is still in repository!
+
         //clean
-        userRepository.delete(userRepository.findAll());
-        permissionRepository.delete(permissionRepository.findAll());
+        cleanAllRepositories();
     }
 
     @Test
     @Transactional(readOnly = false)
     @Rollback(false)
-    public void testNA_entity_should_appeared_in_proper_repository_when_added_as_a_child() throws Exception {
+    public void testNA_entity_should_appeared_in_proper_repository_when_added_as_a_child() {
         UserAccount ua = new UserAccount("albercik", "katakumba");
         Transaction transaction = new Transaction();
 
@@ -300,19 +308,18 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Transactional(readOnly = false)
     @Rollback(false)
-    public void testNB_entity_should_appeared_in_proper_repository_when_added_as_a_child() throws Exception {
+    public void testNB_entity_should_appeared_in_proper_repository_when_added_as_a_child() {
         //then
         assertThat(transactionRepository.findAll()).isNotEmpty();
 
         //clean
-        transactionRepository.delete(transactionRepository.findAll());
-        userRepository.delete(userRepository.findAll());
+        cleanAllRepositories();
     }
 
     @Test
     @Transactional(readOnly = false)
     @Rollback(false)
-    public void testOA_delete_entity_from_collection_using_orphanRemoval(){
+    public void testOA_delete_entity_from_collection_using_orphanRemoval() {
         UserAccount ua = new UserAccount("albercik", "katakumba");
         Transaction transaction = new Transaction();
 
@@ -323,7 +330,7 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Transactional(readOnly = false)
     @Rollback(false)
-    public void testOB_delete_entity_from_collection_using_orphanRemoval() throws Exception {
+    public void testOB_delete_entity_from_collection_using_orphanRemoval() {
         UserAccount ua = userRepository.findByName("albercik");
         ua.getTransactions().remove(0);
     }
@@ -331,17 +338,17 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Transactional(readOnly = false)
     @Rollback(false)
-    public void testOC_delete_entity_from_collection_using_orphanRemoval(){
+    public void testOC_delete_entity_from_collection_using_orphanRemoval() {
         //then
         assertThat(transactionRepository.findAll()).isEmpty(); // The child entity was removed as soon as it was no longer referenced from the "parent" entity,
 
         //clean
-        userRepository.delete(userRepository.findAll());
+        cleanAllRepositories();
     }
 
     @Test
     @Transactional(readOnly = false)
-    public void testP_prePersist_annotation() throws Exception {
+    public void testP_prePersist_annotation() {
         Transaction transaction = new Transaction();
 
         transaction = transactionRepository.save(transaction);
@@ -351,7 +358,7 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Transactional(readOnly = false)
     @Rollback(false)
-    public void testRA_preUpdate_annotation() throws Exception {
+    public void testRA_preUpdate_annotation(){
         //given
         Transaction transaction = new Transaction();
         transaction.setAmount(new BigDecimal(11));
@@ -361,7 +368,7 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Transactional(readOnly = false)
     @Rollback(false)
-    public void testRB_preUpdate_annotation() throws Exception {
+    public void testRB_preUpdate_annotation(){
         //when
         Transaction transaction = transactionRepository.findAll().get(0);
         transaction.setAmount(new BigDecimal(112));
@@ -370,12 +377,19 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Test
     @Transactional(readOnly = false)
     @Rollback(false)
-    public void testRC_preUpdate_annotation() throws Exception {
+    public void testRC_preUpdate_annotation(){
         //than
         Transaction transaction = transactionRepository.findAll().get(0);
         assertThat(transaction.getLastModifiedDateTime()).isNotNull();
 
         //clean
+        cleanAllRepositories();
+    }
+
+    @Transactional(readOnly = false)
+    private void cleanAllRepositories(){
         transactionRepository.delete(transactionRepository.findAll());
+        userRepository.delete(userRepository.findAll());
+        permissionRepository.delete(permissionRepository.findAll());
     }
 }
