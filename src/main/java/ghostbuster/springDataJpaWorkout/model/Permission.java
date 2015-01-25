@@ -12,6 +12,9 @@ public class Permission extends AbstractEntityWithAutoId {
     @ManyToOne(cascade= CascadeType.ALL)
     private UserAccount account;
 
+    public Permission() {
+    }
+
     public void setId(Long id){
         this.id = id;
     }

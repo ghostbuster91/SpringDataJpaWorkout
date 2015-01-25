@@ -2,11 +2,14 @@ package ghostbuster.tests.springDataJpaWorkout.impl;
 
 import ghostbuster.springDataJpaWorkout.ApplicationConfiguration;
 import ghostbuster.springDataJpaWorkout.dao.PermissionRepository;
+import ghostbuster.springDataJpaWorkout.dao.TransactionRepository;
 import ghostbuster.springDataJpaWorkout.dao.UserAccountRepository;
 import ghostbuster.springDataJpaWorkout.model.*;
+import ghostbuster.springDataJpaWorkout.utils.NonPersistClass;
 import ghostbuster.tests.springDataJpaWorkout.AbstractTestExecutor;
 import org.junit.After;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -34,6 +37,10 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Autowired
     @SuppressWarnings("SpringJavaAutowiringInspection")
     private PermissionRepository permissionRepository;
+
+    @Autowired
+    @SuppressWarnings("SpringJavaAutowiringInspection")
+    private TransactionRepository transactionRepository;
 
     @Autowired
     private CacheManager cacheManager;
@@ -117,9 +124,11 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Rollback(false)
     @Transactional(readOnly = false)
     public void testG_A_prepare() {
+        //given
         UserAccount ua = new UserAccount("Janek", "StareHaslo");
         ua = userRepository.save(ua);
 
+        //when
         UserAccount result = userRepository.findByName("Janek");
         result.setPassword("NoweHaslo");
         userRepository.save(result);
@@ -129,14 +138,9 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
     @Rollback(false)
     @Transactional(readOnly = false)
     public void testG_B_entity_should_be_removed_from_cache() throws Exception {
-        //given
-        Cache cache = cacheManager.getCache("byUsername");
-
-        //when
-        Cache.ValueWrapper wrapper = cache.get("Janek");
-
         //then
-        assertThat(wrapper).isNull();
+        Cache cache = cacheManager.getCache("byUsername");
+        assertThat(cache.get("Janek")).isNull();
 
         //clean
         userRepository.delete(userRepository.findByName("Janek"));
@@ -203,6 +207,128 @@ public class UserAccountTestExecutor extends AbstractTestExecutor {
 
         //then
         assertThat(ua.getPermissions()).contains(perm);
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    @Rollback(false)
+    public void testLA_transactional_property_should_not_be_persist() throws Exception {
+        //given
+        UserAccount ua = new UserAccount("albercik", "katakumba");
+
+        //when
+        ua.setNonPersistProperty(new NonPersistClass());
+        ua = userRepository.save(ua);
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    @Rollback(false)
+    public void testLB_transactional_property_should_not_be_persist() {
+        //then
+        UserAccount ua = userRepository.findByName("albercik");
+        assertThat(ua.getNonPersistProperty()).isNull();
+
+        //clean
+        userRepository.delete(userRepository.findAll());
+    }
+
+    @Ignore
+    @Test
+    @Transactional(readOnly = false)
+    public void testM_transactional_property_can_be_injected_from_outside() {
+        //TODO: configure aspectJ or Hibernate event listener
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    @Rollback(false)
+    public void testMA_delete_entity_from_collection(){
+        UserAccount ua = new UserAccount("albercik", "katakumba");
+        Permission perm = new Permission(PermissionType.CREATION);
+
+        perm.setAccount(ua);
+        perm = permissionRepository.save(perm);
+
+        ua.getPermissions().add(perm);
+        ua = userRepository.save(ua);
+
+        assertThat(permissionRepository.findAll()).isNotEmpty();
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    @Rollback(false)
+    public void testMB_delete_entity_from_collection() throws Exception {
+        UserAccount ua = userRepository.findByName("albercik");
+        ua.getPermissions().remove(0);
+        ua = userRepository.save(ua);
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    @Rollback(false)
+    public void testMC_delete_entity_from_collection(){
+        //then
+        assertThat(permissionRepository.findAll()).isNotEmpty(); // The related child entity is still in repository!
+
+        //clean
+        userRepository.delete(userRepository.findAll());
+        permissionRepository.delete(permissionRepository.findAll());
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    @Rollback(false)
+    public void testNA_entity_should_appeared_in_proper_repository_when_added_as_a_child() throws Exception {
+        UserAccount ua = new UserAccount("albercik", "katakumba");
+        Transaction transaction = new Transaction();
+
+        ua.getTransactions().add(transaction);
+        userRepository.save(ua);
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    @Rollback(false)
+    public void testNB_entity_should_appeared_in_proper_repository_when_added_as_a_child() throws Exception {
+        //then
+        assertThat(transactionRepository.findAll()).isNotEmpty();
+
+        //clean
+        transactionRepository.delete(transactionRepository.findAll());
+        userRepository.delete(userRepository.findAll());
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    @Rollback(false)
+    public void testOA_delete_entity_from_collection_using_orphanRemoval(){
+        UserAccount ua = new UserAccount("albercik", "katakumba");
+        Transaction transaction = new Transaction();
+
+        ua.getTransactions().add(transaction);
+        userRepository.save(ua);
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    @Rollback(false)
+    public void testOB_delete_entity_from_collection_using_orphanRemoval() throws Exception {
+        UserAccount ua = userRepository.findByName("albercik");
+        ua.getTransactions().remove(0);
+        ua = userRepository.save(ua);
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    @Rollback(false)
+    public void testOC_delete_entity_from_collection_using_orphanRemoval(){
+        //then
+        assertThat(transactionRepository.findAll()).isEmpty(); // The child entity was removed as soon as it was no longer referenced from the "parent" entity,
+
+        //clean
+        userRepository.delete(userRepository.findAll());
     }
 
 

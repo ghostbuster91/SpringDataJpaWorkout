@@ -11,7 +11,7 @@ import java.io.Serializable;
 public abstract class AbstractEntityWithAutoId implements Serializable {
 
     @Id
-    @Column(name="ID")
+    @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     protected Long id;
 
