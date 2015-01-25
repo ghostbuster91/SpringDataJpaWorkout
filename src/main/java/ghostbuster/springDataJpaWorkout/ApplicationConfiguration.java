@@ -1,4 +1,4 @@
-package ghostbuster.dao;
+package ghostbuster.springDataJpaWorkout;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cache.Cache;

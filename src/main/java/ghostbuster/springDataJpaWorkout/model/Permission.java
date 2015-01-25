@@ -1,4 +1,4 @@
-package ghostbuster.dao.model;
+package ghostbuster.springDataJpaWorkout.model;
 
 import javax.persistence.*;
 
