@@ -1,8 +1,6 @@
-package ghostbuster.springDataJpaWorkout.model;
+package ghostbuster.springDataJpaWorkout.model.bank;
 
 import ghostbuster.springDataJpaWorkout.utils.NonPersistClass;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 
 import javax.persistence.*;
 import java.util.ArrayList;

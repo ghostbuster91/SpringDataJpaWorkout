@@ -1,4 +1,4 @@
-package ghostbuster.springDataJpaWorkout.model;
+package ghostbuster.springDataJpaWorkout.model.bank;
 
 import javax.persistence.*;
 import java.util.Date;

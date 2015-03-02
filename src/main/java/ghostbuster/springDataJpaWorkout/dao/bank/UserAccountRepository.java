@@ -1,6 +1,6 @@
-package ghostbuster.springDataJpaWorkout.dao;
+package ghostbuster.springDataJpaWorkout.dao.bank;
 
-import ghostbuster.springDataJpaWorkout.model.UserAccount;
+import ghostbuster.springDataJpaWorkout.model.bank.UserAccount;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;

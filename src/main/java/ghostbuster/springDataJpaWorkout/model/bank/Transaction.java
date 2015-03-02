@@ -1,4 +1,4 @@
-package ghostbuster.springDataJpaWorkout.model;
+package ghostbuster.springDataJpaWorkout.model.bank;
 
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDateTime;
